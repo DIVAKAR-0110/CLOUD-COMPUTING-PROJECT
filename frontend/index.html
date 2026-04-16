@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Cloud Performance Monitor - Real-time CPU monitoring dashboard for cloud servers" />
+    <title>CloudMonitor | Team 12 - Performance Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="auth-screen">
+      <div class="auth-bg">
+        <div class="auth-orb orb-1"></div>
+        <div class="auth-orb orb-2"></div>
+        <div class="auth-orb orb-3"></div>
+      </div>
+      <div class="auth-card">
+        <div class="auth-logo">
+          <div class="logo-icon">⚡</div>
+          <h1>CloudMonitor</h1>
+          <p>Team 12 — Performance Intelligence</p>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form" class="auth-form active">
+          <h2>Welcome Back</h2>
+          <p class="form-subtitle">Sign in to your monitoring dashboard</p>
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" />
+          </div>
+          <div id="login-error" class="form-error hidden"></div>
+          <button id="login-btn" class="btn-primary">
+            <span>Sign In</span>
+            <div class="btn-loader hidden"></div>
+          </button>
+          <p class="form-switch">Don't have an account? <a href="#" id="go-register">Register</a></p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form" class="auth-form">
+          <h2>Create Account</h2>
+          <p class="form-subtitle">Start monitoring your cloud server</p>
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input id="reg-name" type="text" placeholder="John Doe" />
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input id="reg-email" type="email" placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input id="reg-password" type="password" placeholder="Min. 6 characters" />
+          </div>
+          <div id="register-error" class="form-error hidden"></div>
+          <button id="register-btn" class="btn-primary">
+            <span>Create Account</span>
+            <div class="btn-loader hidden"></div>
+          </button>
+          <p class="form-switch">Already have an account? <a href="#" id="go-login">Sign In</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="dashboard hidden">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <span class="logo-icon">⚡</span>
+          <span>CloudMonitor</span>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" data-page="overview" id="nav-overview">
+            <span class="nav-icon">📊</span> Overview
+          </a>
+          <a href="#" class="nav-item" data-page="live" id="nav-live">
+            <span class="nav-icon">🔴</span> Live Monitor
+          </a>
+          <a href="#" class="nav-item" data-page="history" id="nav-history">
+            <span class="nav-icon">📈</span> History
+          </a>
+          <a href="#" class="nav-item" data-page="alerts" id="nav-alerts">
+            <span class="nav-icon">🔔</span> Alerts
+            <span id="alert-badge" class="badge hidden">0</span>
+          </a>
+          <a href="#" class="nav-item" data-page="analysis" id="nav-analysis">
+            <span class="nav-icon">🧠</span> Analysis
+          </a>
+        </nav>
+        <div class="sidebar-user">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <div class="user-info">
+            <span id="user-name">User</span>
+            <span id="user-role">user</span>
+          </div>
+          <button id="logout-btn" class="logout-btn" title="Logout">⏻</button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Header -->
+        <header class="dash-header">
+          <div class="header-left">
+            <h2 id="page-title">Overview</h2>
+            <span id="last-updated" class="last-updated">Waiting for data...</span>
+          </div>
+          <div class="header-right">
+            <div id="connection-status" class="status-pill disconnected">
+              <span class="status-dot"></span> Disconnected
+            </div>
+            <button id="start-monitor-btn" class="btn-monitor start">▶ Start Monitor</button>
+            <button id="stop-monitor-btn" class="btn-monitor stop hidden">⏹ Stop Monitor</button>
+          </div>
+        </header>
+
+        <!-- OVERVIEW PAGE -->
+        <section id="page-overview" class="page active">
+          <div class="stats-grid">
+            <div class="stat-card cpu-card">
+              <div class="stat-icon">🖥️</div>
+              <div class="stat-info">
+                <span class="stat-label">CPU Load</span>
+                <span class="stat-value" id="ov-cpu">--%</span>
+              </div>
+              <div class="stat-ring" id="cpu-ring">
+                <svg viewBox="0 0 36 36">
+                  <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="ring-fill" id="cpu-ring-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-card mem-card">
+              <div class="stat-icon">💾</div>
+              <div class="stat-info">
+                <span class="stat-label">Memory Used</span>
+                <span class="stat-value" id="ov-mem">--%</span>
+              </div>
+              <div class="stat-ring">
+                <svg viewBox="0 0 36 36">
+                  <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="ring-fill mem-fill" id="mem-ring-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-card temp-card">
+              <div class="stat-icon">🌡️</div>
+              <div class="stat-info">
+                <span class="stat-label">CPU Temp</span>
+                <span class="stat-value" id="ov-temp">-- °C</span>
+              </div>
+            </div>
+            <div class="stat-card spike-card">
+              <div class="stat-icon">⚠️</div>
+              <div class="stat-info">
+                <span class="stat-label">Spike Status</span>
+                <span class="stat-value" id="ov-spike">Normal</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini chart -->
+          <div class="card chart-card">
+            <div class="card-header">
+              <h3>CPU Load — Live (Last 30s)</h3>
+              <span class="card-badge live-badge">● LIVE</span>
+            </div>
+            <canvas id="mini-chart" height="100"></canvas>
+          </div>
+
+          <!-- Core Usage -->
+          <div class="card">
+            <div class="card-header"><h3>Core-by-Core Usage</h3></div>
+            <div id="core-bars" class="core-bars"></div>
+          </div>
+        </section>
+
+        <!-- LIVE MONITOR PAGE -->
+        <section id="page-live" class="page">
+          <div class="card chart-card">
+            <div class="card-header">
+              <h3>Real-Time CPU Load (%)</h3>
+              <span class="card-badge live-badge">● LIVE</span>
+            </div>
+            <canvas id="live-chart" height="120"></canvas>
+          </div>
+
+          <div class="live-grid">
+            <div class="card">
+              <div class="card-header"><h3>Top CPU Processes</h3></div>
+              <div id="process-list" class="process-list">
+                <p class="empty-state">Start monitoring to see processes...</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Memory Breakdown</h3></div>
+              <canvas id="mem-chart" height="180"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- HISTORY PAGE -->
+        <section id="page-history" class="page">
+          <div class="card">
+            <div class="card-header">
+              <h3>Historical CPU Load</h3>
+              <select id="history-filter" class="select-input">
+                <option value="1">Last 1 Hour</option>
+                <option value="6">Last 6 Hours</option>
+                <option value="24">Last 24 Hours</option>
+              </select>
+            </div>
+            <canvas id="history-chart" height="120"></canvas>
+          </div>
+          <div class="summary-grid" id="summary-grid">
+            <div class="summary-card">
+              <span class="summary-label">Total Records</span>
+              <span class="summary-val" id="sum-total">--</span>
+            </div>
+            <div class="summary-card">
+              <span class="summary-label">Spike Events</span>
+              <span class="summary-val spike-val" id="sum-spikes">--</span>
+            </div>
+            <div class="summary-card">
+              <span class="summary-label">Avg CPU Load</span>
+              <span class="summary-val" id="sum-avg">--%</span>
+            </div>
+            <div class="summary-card">
+              <span class="summary-label">Peak CPU Load</span>
+              <span class="summary-val spike-val" id="sum-max">--%</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ALERTS PAGE -->
+        <section id="page-alerts" class="page">
+          <div class="card">
+            <div class="card-header">
+              <h3>Alert Log</h3>
+              <span id="alert-count" class="card-badge">0 alerts</span>
+            </div>
+            <div id="alerts-list" class="alerts-list">
+              <p class="empty-state">No alerts yet. Start monitoring to detect CPU spikes.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ANALYSIS PAGE -->
+        <section id="page-analysis" class="page">
+          <div class="card analysis-card">
+            <div class="card-header"><h3>🧠 Performance Analysis Report</h3></div>
+            <div class="analysis-content">
+              <div class="analysis-section">
+                <h4>What is CPU Spike?</h4>
+                <p>A CPU spike occurs when processor utilization suddenly jumps above <strong>80%</strong> for a short period. This is detected in real-time and logged automatically.</p>
+              </div>
+              <div class="analysis-section">
+                <h4>Common Causes of CPU Spikes</h4>
+                <ul>
+                  <li>🔁 <strong>Runaway processes</strong> — Infinite loops, memory leaks</li>
+                  <li>📦 <strong>Batch jobs</strong> — Scheduled tasks running simultaneously</li>
+                  <li>🌐 <strong>Traffic bursts</strong> — Sudden increase in HTTP requests</li>
+                  <li>🗄️ <strong>Database queries</strong> — Heavy unoptimized queries</li>
+                  <li>🔒 <strong>Cryptographic operations</strong> — SSL handshakes, hashing</li>
+                </ul>
+              </div>
+              <div class="analysis-section">
+                <h4>How CloudMonitor Detects Spikes</h4>
+                <div class="flow-steps">
+                  <div class="flow-step"><span>1</span> Poll system metrics every 2 seconds via <code>systeminformation</code></div>
+                  <div class="flow-step"><span>2</span> Stream data to dashboard via <code>Socket.IO</code> WebSocket</div>
+                  <div class="flow-step"><span>3</span> If CPU &gt; 80%, flag as <code>isSpiking: true</code></div>
+                  <div class="flow-step"><span>4</span> Persist spike record to <code>MongoDB Atlas</code></div>
+                  <div class="flow-step"><span>5</span> Fire visual alert with timestamp &amp; top process info</div>
+                </div>
+              </div>
+              <div class="analysis-section">
+                <h4>Mitigation Strategies</h4>
+                <div class="mitigation-grid">
+                  <div class="mitigation-card">
+                    <span>⚖️</span>
+                    <h5>Load Balancing</h5>
+                    <p>Distribute traffic across multiple instances</p>
+                  </div>
+                  <div class="mitigation-card">
+                    <span>📈</span>
+                    <h5>Auto Scaling</h5>
+                    <p>Scale horizontally on cloud platforms</p>
+                  </div>
+                  <div class="mitigation-card">
+                    <span>🧵</span>
+                    <h5>Process Limits</h5>
+                    <p>Set CPU quotas with cgroups or PM2</p>
+                  </div>
+                  <div class="mitigation-card">
+                    <span>🗺️</span>
+                    <h5>Profiling</h5>
+                    <p>Identify hot paths with Node.js profiler</p>
+                  </div>
+                </div>
+              </div>
+              <div class="analysis-section">
+                <h4>Live Report</h4>
+                <div id="live-analysis" class="live-analysis">
+                  <p>Start monitoring to generate live analysis...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+========================================================================
+⚡ CLOUD MONITOR (TEAM 12) - STEP-BY-STEP DASHBOARD GUIDE
+========================================================================
+
+This guide explains the technical concept behind each module of your
+Cloud Performance project. Use this to explain the project to your tutor.
+
+------------------------------------------------------------------------
+MODULE 1: AUTHENTICATION & SECURITY
+------------------------------------------------------------------------
+CONCEPT: "Secure Data Access"
+- STEP 1: When you register, the 'Bcrypt' library scrambles your password 
+  (hashing) so it is never saved as plain text in the database.
+- STEP 2: When you log in, the server gives you a 'JWT' (JSON Web Token).
+- STEP 3: This token is like a digital VIP pass. The dashboard only shows 
+  performance data if this token is valid.
+
+------------------------------------------------------------------------
+MODULE 2: OVERVIEW (THE PULSE)
+------------------------------------------------------------------------
+CONCEPT: "Current State Visibility"
+- STEP 1: Every 2 seconds, the server uses 'systeminformation' to read the 
+  CPU percentage and Memory usage.
+- STEP 2: The data is sent via 'Socket.io' (WebSockets) to the dashboard.
+- STEP 3: The 'Core-by-Core' bars show how the load is balanced. If Core 1 
+  is at 100% but others are at 0%, you have a "Single-threaded Bottle-neck."
+
+------------------------------------------------------------------------
+MODULE 3: LIVE MONITOR (REAL-TIME TREND)
+------------------------------------------------------------------------
+CONCEPT: "Behavioral Streaming"
+- STEP 1: As new data arrives, 'Chart.js' adds a new point to the graph.
+- STEP 2: This creates a "Live Stream" feeling.
+- STEP 3: The 'Top Processes' list shows which actual Windows/Linux names 
+  (like chrome.exe or node.exe) are eating the most CPU right now.
+
+------------------------------------------------------------------------
+MODULE 4: HISTORY (THE CLOUD MEMORY)
+------------------------------------------------------------------------
+CONCEPT: "Persistent Analysis"
+- STEP 1: Every time the server detects a CPU spike, it sends a command: 
+  "db.metrics.insert()".
+- STEP 2: This data travels to 'MongoDB Atlas' in the Cloud.
+- STEP 3: When you click the History tab, the app fetches this data and 
+  paints a Bar Chart. Red bars = Problem times. Blue bars = Healthy times.
+
+------------------------------------------------------------------------
+MODULE 5: ALERTS (THE INCIDENT LOG)
+------------------------------------------------------------------------
+CONCEPT: "Threshold Detection"
+- STEP 1: The code has a rule: IF CPU > 80% THEN 'isSpiking = true'.
+- STEP 2: When true, a visual 'Toast' notification pops up on the screen.
+- STEP 3: The Alert is logged. You can click "Resolve" to acknowledge 
+  that you have seen the spike and handled it.
+
+------------------------------------------------------------------------
+MODULE 6: ANALYSIS (EDUCATIONAL REPORT)
+------------------------------------------------------------------------
+CONCEPT: "Performance Intelligence"
+- STEP 1: This module explains 'WHY' things happen.
+- STEP 2: It monitors the 'Live Report' and summarizes the current system 
+  health in a human-readable text block.
+- STEP 3: It explains concepts like 'Runaway Processes' and 'Batch Jobs' 
+  to satisfy the academic requirements of the project.
+
+========================================================================
+❓ FREQUENTLY ASKED TUTOR QUESTIONS (Q&A)
+========================================================================
+
+Q1: "Why does the dashboard show 12 CPU cores specifically?"
+------------------------------------------------------------
+ANSWER: The application uses "Hardware Auto-Detection." It is not limited 
+to 12 cores; it dynamically reads the host machine's physical hardware 
+using the 'os' module. This ensures the project is "Scalable"—it works on 
+a laptop with 4 cores or a cloud server with 128 cores without changing 
+any code. Monitoring individual cores allows us to see if a single core 
+is being overloaded while others are idle.
+
+Q2: "How exactly are you detecting the Load, Memory, and Spikes?"
+-----------------------------------------------------------------
+ANSWER: We use a Professional 3-Step Process:
+1. EXTRACTION: We use the 'systeminformation' library which queries the
+   OS Kernel (WMI on Windows / /proc on Linux) for precise metrics.
+2. TRANSMISSION: We use 'Socket.io' (WebSockets) to stream this data
+   instantly to the browser every 2 seconds without page refreshes.
+3. SPIKE LOGIC: In 'server.js', we programmed a specific threshold logic:
+   IF (CPU > 80%) THEN { Trigger Alert + Save to MongoDB }.
+
+========================================================================
+SUMMARY FOR YOUR TUTOR:
+"Our project doesn't just show numbers; it intelligently monitors them. 
+By using WebSockets for speed and MongoDB for cloud persistence, Team 12 
+created a tool that can predict and log server failure points in real-time."
+========================================================================
+
+
+To host this project properly as a Cloud-Based Web Application, you should split it into two parts. Here is the best and easiest way to do it for free:
+
+Step 1: Host the Backend (API & Monitoring)
+Service: Render.com (Free Tier)
+
+Prepare for Git: Initialize a Git repository in your folder and push your code to GitHub.
+Create Web Service: On Render, click "New" -> "Web Service" and connect your GitHub repo.
+Configure:
+Root Directory: backend
+Build Command: npm install
+Start Command: node server.js
+Environment Variables: In the "Environment" tab on Render, add the variables from your .env file:
+MONGO_URI, JWT_SECRET, NODE_ENV=production, etc.
+Result: You will get a URL like https://cloud-monitor-api.onrender.com.
+Step 2: Host the Frontend (Dashboard UI)
+Service: Vercel or Netlify
+
+Create Project: Connect your GitHub repo to Vercel.
+Configure:
+Root Directory: frontend
+Framework Preset: Vite
+Build Command: npm run build
+Output Directory: dist
+API Connection: Since your frontend needs to talk to your new Render backend, you need to update the API URL.
+Deploy: Click Deploy.
+Step 3: Important "Cloud" Nuance
+When you host the backend on a service like Render:
+
+The Monitor will track the Render Server: Once hosted, the dashboard will show the CPU and Memory of the Render Cloud Computer, not your own laptop.
+This is actually exactly what your tutor wants—a cloud application monitoring a cloud server!
+Summary Checklist for Deployment:
+MongoDB Atlas: Change "Access IP" to 0.0.0.0/0 (Allow access from anywhere) so the Render server can connect.
+GitHub: Make sure you have a .gitignore so you don't push your .env file with passwords to the public.
+CORS: In backend/server.js, make sure the origin is set to your new Vercel URL.
