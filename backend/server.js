@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: '*', // Allow all for initial cloud setup
     methods: ['GET', 'POST'],
   },
 });
@@ -22,8 +22,31 @@ const io = new Server(server, {
 connectDB();
 
 // Middleware
-app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' }));
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
+
+// More flexible CORS for cloud deployment
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+  'http://localhost:5173',
+  /\.vercel\.app$/, // Allow all Vercel subdomains
+  /\.amplifyapp\.com$/ // Allow all AWS Amplify subdomains
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(ao => (ao instanceof RegExp ? ao.test(origin) : ao === origin))) {
+      return callback(null, true);
+    }
+    return callback(null, true); // For now, allowing all during setup
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(morgan('dev'));
 
