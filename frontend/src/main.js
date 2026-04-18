@@ -2,11 +2,8 @@ import { io } from 'socket.io-client';
 import Chart from 'chart.js/auto';
 
 // ─── CONFIG ────────────────────────────────────────────────────
-// Change this to your AWS EC2 Public IP for production
-const PROD_URL = 'http://54.146.17.28:5000';
-const API_URL = window.location.hostname === 'localhost' ? '' : PROD_URL;
-const API = `${API_URL}/api`;
-
+const API_URL = import.meta.env.VITE_API_URL || ''; 
+const API = API_URL + '/api';
 let token = localStorage.getItem('cm_token');
 let socket = null;
 let isMonitoring = false;
@@ -278,10 +275,7 @@ function pushData(labels, data, label, value, max = MAX_POINTS) {
 // ─── SOCKET.IO MONITORING ──────────────────────────────────────
 function startMonitoring() {
   if (isMonitoring) return;
-  
-  // Use absolute URL for the socket connection in production
-  const socketUrl = window.location.hostname === 'localhost' ? '/' : PROD_URL;
-  socket = io(socketUrl, { auth: { token } });
+  socket = io(API_URL || '/', { auth: { token } });
 
   socket.on('connect', () => {
     isMonitoring = true;
