@@ -1,0 +1,81 @@
+# ⚡ CloudMonitor — Cloud Architecture & Deployment Guide
+=======================================================
+
+This document explains how the Cloud Performance Monitor system is hosted, 
+the technologies used, and how the frontend and backend communicate in a 
+distributed cloud environment.
+
+---
+
+## 🏗️ System Architecture
+
+The project is split into three main cloud layers to ensure scalability, 
+security, and real-time performance.
+
+1.  ### FRONTEND: AWS Amplify (Static Hosting)
+    *   **Role**: Serves the user interface (HTML/CSS/JS).
+    *   **Technology**: Vite + Vanilla JavaScript.
+    *   **How it works**: When a user visits the URL, AWS Amplify delivers 
+        the compiled frontend files via a high-speed CDN. 
+    *   **Security**: Uses HTTPS/SSL to encrypt traffic between the user 
+        and the cloud.
+
+2.  ### BACKEND: Render.com (Web Service)
+    *   **Role**: Processes API requests and streams real-time CPU data.
+    *   **Technology**: Node.js + Express.js + Socket.io.
+    *   **Monitoring**: Uses the `systeminformation` library to poll the 
+        server's CPU, Memory, and Temperature.
+    *   **How it works**: The backend is "persistent" (it never sleeps), 
+        allowing it to maintain a 24/7 WebSocket connection with users.
+    *   **Hosting**: Moved to Render to provide a secure HTTPS endpoint 
+        allowing safe communication with the AWS frontend (solving the 
+        "Mixed Content" security issue).
+
+3.  ### DATABASE: MongoDB Atlas (Database-as-a-Service)
+    *   **Role**: Stores user accounts, CPU spike history, and alerts.
+    *   **Technology**: MongoDB (NoSQL).
+    *   **How it works**: The backend connects to Atlas via an encrypted 
+        connection string (SRV).
+    *   **Security**: IP whitelisting is enabled (0.0.0.0/0) to allow 
+        the dynamic Render cloud nodes to connect.
+
+---
+
+## 📡 Communication Flow
+
+### 1. Authentication (REST API)
+*   The Frontend sends a `POST` request to `https://cloud-monitor-api.onrender.com/api/auth/register`.
+*   The Backend hashes the password using **Bcrypt**, saves the user 
+    to MongoDB, and returns a **JWT (JSON Web Token)**.
+*   The Frontend saves this token in `localStorage` to keep the user logged in.
+
+### 2. Real-Time Monitoring (WebSockets)
+*   Once logged in, the Frontend initializes a **Socket.IO** connection.
+*   The Backend polls the system hardware load every 2 seconds.
+*   Data is "Pushed" to the frontend automatically (no refreshing needed).
+
+### 3. Alert Initialization
+*   If the Backend detects CPU usage > 80%, it triggers an alert.
+*   The Backend simultaneously:
+    1.  Emits an `isSpiking: true` event to the user's dashboard.
+    2.  Saves the spike record into the MongoDB history.
+
+---
+
+## 🔐 Security Measures
+
+*   **CORS (Cross-Origin Resource Sharing)**: The Backend is configured 
+    to ONLY allow requests from your specific AWS Amplify domain.
+*   **Mixed Content Protection**: Both Frontend and Backend use HTTPS 
+    to prevent data interception.
+*   **Rate Limiting**: The API prevents brute-force attacks by limiting 
+    the number of requests per IP.
+
+---
+
+## 🚀 Deployment Links
+
+*   **Frontend**: https://main.d3qws1slyewhw4.amplifyapp.com/
+*   **Backend API**: https://cloud-monitor-api.onrender.com/api/health
+*   **Database**: MongoDB Atlas (Cloud Cluster)
+
